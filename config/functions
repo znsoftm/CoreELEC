@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
-# Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
+# Copyright (C) 2018 Team LibreELEC (https://libreelec.tv)
+# Copyright (C) 2018-present Team CoreELEC (https://coreelec.org)
 
 ### FUNCTION HELPERS ###
 # die (message, code) abort with optional message and code
@@ -1130,7 +1131,7 @@ done
     sed -e "s|@PKG_ADDON_NEWS@||g" -i "$addon_xml"
   fi
 
-  provider_name=${PKG_MAINTAINER:-"Team LibreELEC"}
+  provider_name=${PKG_MAINTAINER:-"Team CoreELEC"}
   addon_name=${PKG_ADDON_NAME:-"$PKG_NAME"}
 
   for f in $PKG_DIR/source/resources/screenshot-*.{jpg,png}; do
