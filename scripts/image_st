@@ -2,7 +2,8 @@
 
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Copyright (C) 2009-2016 Stephan Raue (stephan@openelec.tv)
-# Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
+# Copyright (C) 2016-2019 Team LibreELEC (https://libreelec.tv)
+# Copyright (C) 2019-present Team CoreELEC (https://coreelec.org)
 
 unset _CACHE_PACKAGE_LOCAL _CACHE_PACKAGE_GLOBAL _DEBUG_DEPENDS_LIST _DEBUG_PACKAGE_LIST
 
@@ -52,6 +53,7 @@ function do_mkimage() {
     SYSTEM_SIZE="$SYSTEM_SIZE" \
     SYSTEM_PART_START="$SYSTEM_PART_START" \
     OVA_SIZE="$OVA_SIZE" \
+    [ -n "$SUBDEVICE" ] && SUBDEVICE="$SUBDEVICE" \
     $SCRIPTS/mkimage
 }
 
@@ -69,7 +71,7 @@ if [ "$LIBREELEC_VERSION" = "devel" ]; then
     daily)   LIBREELEC_VERSION=daily-$(date +%Y%j)-$GIT_ABBREV;;
     weekly)  LIBREELEC_VERSION=weekly-$(date +%G%V)-$GIT_ABBREV;;
     monthly) LIBREELEC_VERSION=monthly-$(date +%Y%m)-$GIT_ABBREV;;
-    *)       LIBREELEC_VERSION=devel-$(date +%Y%m%d%H%M%S)-$GIT_ABBREV;;
+    *)       LIBREELEC_VERSION=devel-$(date +%s);;
   esac
 fi
 
@@ -144,17 +146,16 @@ echo "$TARGET_VERSION" > $INSTALL/etc/release
 # create /etc/os-release
 echo -e "NAME=\"$DISTRONAME\"" > $INSTALL/etc/os-release
 echo -e "VERSION=\"$LIBREELEC_VERSION\"" >> $INSTALL/etc/os-release
-echo -e "ID=\"libreelec\"" >> $INSTALL/etc/os-release
+echo -e "ID=\"coreelec\"" >> $INSTALL/etc/os-release
 echo -e "VERSION_ID=\"$OS_VERSION\"" >> $INSTALL/etc/os-release
 echo -e "PRETTY_NAME=\"$DISTRONAME ($LIBREELEC_BUILD): $LIBREELEC_VERSION\"" >> $INSTALL/etc/os-release
-echo -e "HOME_URL=\"https://libreelec.tv\"" >> $INSTALL/etc/os-release
+echo -e "HOME_URL=\"https://coreelec.org\"" >> $INSTALL/etc/os-release
 echo -e "BUG_REPORT_URL=\"$ORIGIN_URL\"" >> $INSTALL/etc/os-release
 echo -e "BUILD_ID=\"$GIT_HASH\"" >> $INSTALL/etc/os-release
-echo -e "OPENELEC_ARCH=\"$LIBREELEC_ARCH\"" >> $INSTALL/etc/os-release
-echo -e "LIBREELEC_ARCH=\"$LIBREELEC_ARCH\"" >> $INSTALL/etc/os-release
-echo -e "LIBREELEC_BUILD=\"$LIBREELEC_BUILD\"" >> $INSTALL/etc/os-release
-echo -e "LIBREELEC_PROJECT=\"$PROJECT\"" >> $INSTALL/etc/os-release
-[ -n "$DEVICE" ] && echo -e "LIBREELEC_DEVICE=\"$DEVICE\"" >> $INSTALL/etc/os-release
+echo -e "COREELEC_ARCH=\"$LIBREELEC_ARCH\"" >> $INSTALL/etc/os-release
+echo -e "COREELEC_BUILD=\"$LIBREELEC_BUILD\"" >> $INSTALL/etc/os-release
+echo -e "COREELEC_PROJECT=\"$PROJECT\"" >> $INSTALL/etc/os-release
+[ -n "$DEVICE" ] && echo -e "COREELEC_DEVICE=\"$DEVICE\"" >> $INSTALL/etc/os-release
 [ -n "$BUILDER_NAME" ] && echo -e "BUILDER_NAME=\"$BUILDER_NAME\"" >> $INSTALL/etc/os-release
 [ -n "$BUILDER_VERSION" ] && echo -e "BUILDER_VERSION=\"$BUILDER_VERSION\"" >> $INSTALL/etc/os-release
 
@@ -384,7 +385,14 @@ if [ "$1" = "release" -o "$1" = "mkimage" -o "$1" = "amlpkg" -o "$1" = "noobs" ]
         do_mkimage "$IMAGE_NAME-$UBOOT_SYSTEM"
       done
     else
-      do_mkimage
+      if [ -n "$SUBDEVICES" ]; then
+        [ "$PROJECT" = "Amlogic" ] && SUBDEVICES+=" Generic"
+        for SUBDEVICE in $SUBDEVICES; do
+          do_mkimage "$IMAGE_NAME"
+        done
+      else
+        do_mkimage
+      fi
     fi
   fi
 

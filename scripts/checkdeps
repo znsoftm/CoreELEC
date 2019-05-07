@@ -2,6 +2,7 @@
 
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Copyright (C) 2009-2016 Stephan Raue (stephan@openelec.tv)
+# Copyright (C) 2019-present Team CoreELEC (https://coreelec.org)
 
 . config/options ""
 
@@ -67,8 +68,8 @@ perl_mod=(JSON XML::Parser)
 
 case "$DISTRO" in
     fedora|centos|rhel)
-      deps+=(g++ mkfontscale mkfontdir bdftopcf xsltproc java python)
-      deps_pkg+=(gcc-c++ xorg-x11-font-utils xorg-x11-font-utils xorg-x11-font-utils libxslt java-1.7.0-openjdk python2)
+      deps+=(g++ mkfontscale mkfontdir bdftopcf xsltproc java python pigz)
+      deps_pkg+=(gcc-c++ xorg-x11-font-utils xorg-x11-font-utils xorg-x11-font-utils libxslt java-1.7.0-openjdk python2 pigz)
       if [[ ! $(rpm -qa glibc-static) ]]; then
         deps+=(glibc-static)
         deps_pkg+=(glibc-static)
@@ -81,19 +82,19 @@ case "$DISTRO" in
       perl_pkg=(perl-JSON perl-XML-parser)
       ;;
     gentoo|sabayon)
-      deps+=(g++ mkfontscale mkfontdir bdftopcf xsltproc java python)
-      deps_pkg+=("gcc[cxx]" mkfontscale mkfontdir bdftopcf libxslt virtual/jre python)
+      deps+=(g++ mkfontscale mkfontdir bdftopcf xsltproc java python pigz)
+      deps_pkg+=("gcc[cxx]" mkfontscale mkfontdir bdftopcf libxslt virtual/jre python pigz)
       files_pkg=(glibc ncurses)
       perl_pkg=(JSON XML-Parser)
       ;;
-    arch)
-      deps+=(g++ mkfontscale mkfontdir bdftopcf xsltproc java python)
-      deps_pkg+=(g++ xorg-mkfontscale xorg-mkfontdir xorg-bdftopcf libxslt "java-runtime-common jdk8-openjdk" python2)
+    arch|manjaro)
+      deps+=(g++ mkfontscale mkfontdir bdftopcf xsltproc java python pigz)
+      deps_pkg+=(g++ xorg-mkfontscale xorg-mkfontdir xorg-bdftopcf libxslt "java-runtime-common jdk8-openjdk" python2 pigz)
       perl_pkg=(perl-json perl-xml-parser)
       ;;
     opensuse)
-      deps+=( g++ mkfontscale mkfontdir bdftopcf xsltproc java python)
-      deps_pkg+=(gcc-c++ mkfontscale mkfontdir bdftopcf libxslt-tools java-1_8_0-openjdk python)
+      deps+=( g++ mkfontscale mkfontdir bdftopcf xsltproc java python pigz)
+      deps_pkg+=(gcc-c++ mkfontscale mkfontdir bdftopcf libxslt-tools java-1_8_0-openjdk python pigz)
       if [[ ! $(rpm -qa glibc-devel-static) ]]; then
         deps+=(glibc-devel-static)
         deps_pkg+=(glibc-devel-static)
@@ -101,8 +102,8 @@ case "$DISTRO" in
       perl_pkg=(perl-JSON perl-XML-Parser)
       ;;
     *)
-      deps+=(g++ mkfontscale mkfontdir bdftopcf xsltproc java python)
-      deps_pkg+=(g++ xfonts-utils xfonts-utils xfonts-utils xsltproc default-jre python)
+      deps+=(g++ mkfontscale mkfontdir bdftopcf xsltproc java python pigz)
+      deps_pkg+=(g++ xfonts-utils xfonts-utils xfonts-utils xsltproc default-jre python pigz)
       perl_pkg=(libjson-perl libxml-parser-perl)
       ;;
 esac
@@ -150,7 +151,7 @@ if [ "${#need[@]}" -gt 0 ]; then
       mageia)
         get_yes_no && sudo urpmi "${need_pkg[@]}"
         ;;
-      arch)
+      arch|manjaro)
         get_yes_no && sudo pacman -Sy "${need_pkg[@]}"
         ;;
       opensuse)
