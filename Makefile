@@ -3,19 +3,19 @@ BUILD_DIRS=build.*
 all: release
 
 system:
-	./scripts/image
+	./scripts/image_st
 
 release:
-	./scripts/image release
+	./scripts/image_st release
 
 image:
-	./scripts/image mkimage
+	./scripts/image_st mkimage
 
 noobs:
-	./scripts/image noobs
+	./scripts/image_st noobs
 
 amlpkg:
-	./scripts/image amlpkg
+	./scripts/image_st amlpkg
 
 # legacy sequential build targets
 system-st:
