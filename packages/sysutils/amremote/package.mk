@@ -1,16 +1,26 @@
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: GPL-2.0-or-later
 # Copyright (C) 2009-2016 Stephan Raue (stephan@openelec.tv)
 # Copyright (C) 2018-present Team CoreELEC (https://coreelec.org)
 
 PKG_NAME="amremote"
-PKG_VERSION="6431040"
-PKG_SHA256="5859680b0951ed3d2265999b7ad5309060587815df4dd1c48c6fa9aae039d5c5"
 PKG_ARCH="arm aarch64"
 PKG_LICENSE="other"
 PKG_SITE="http://www.amlogic.com"
-PKG_URL="https://github.com/codesnake/amremote/archive/$PKG_VERSION.tar.gz"
 PKG_DEPENDS_TARGET="toolchain usbutils"
 PKG_LONGDESC="amremote - IR remote configuration utility for Amlogic-based devices"
+
+case "$LINUX" in
+  amlogic-3.14)
+    PKG_VERSION="3693417803e660796043ea7443a1621ad146db38"
+    PKG_SHA256="8c7aadbca4d01b6f4f8997935b624b26147115c3c2dd421edcd46937ad1b6892"
+    PKG_URL="https://github.com/CoreELEC/amremote/archive/$PKG_VERSION.tar.gz"
+    ;;
+  amlogic-4.9)
+    PKG_VERSION="1db130a0ccd47f6b5c3d1dffab1e89613b796a8c"
+    PKG_SHA256="5b96f2a1dd03200909eed749f5d97d1d02ee7fc8ac92d8fce6b5d6772ee642dc"
+    PKG_URL="https://github.com/CoreELEC/amremote/archive/$PKG_VERSION.tar.gz"
+    ;;
+esac
 
 makeinstall_target() {
   mkdir -p $INSTALL/usr/bin

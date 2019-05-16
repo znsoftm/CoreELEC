@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: GPL-2.0-or-later
 # Copyright (C) 2009-2016 Stephan Raue (stephan@openelec.tv)
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 # Copyright (C) 2018-present Team CoreELEC (https://coreelec.org)
@@ -66,7 +66,7 @@ TARGET_VERSION="$LIBREELEC_ARCH-$LIBREELEC_VERSION"
 if [ -n "$CUSTOM_IMAGE_NAME" ]; then
   IMAGE_NAME="$CUSTOM_IMAGE_NAME"
 else
-  if [ "$DEVEL_VERSION" = "devel" ] && [ -z "$CUSTOM_VERSION" ]; then
+  if [ "$DEVEL_VERSION" = "devel" ]; then
     IMAGE_NAME="$DISTRONAME-$LIBREELEC_ARCH-$OS_VERSION-$LIBREELEC_VERSION"
   else
     IMAGE_NAME="$DISTRONAME-$TARGET_VERSION"
@@ -338,7 +338,7 @@ if [ "$1" = "release" -o "$1" = "mkimage" -o "$1" = "amlpkg" -o "$1" = "noobs" ]
     fi
 
     if [ -n "$SUBDEVICES" ]; then
-      SUBDEVICES+=" Generic"
+      [ "$PROJECT" = "Amlogic" ] && SUBDEVICES+=" Generic"
       for SUBDEVICE in $SUBDEVICES;do
         # variables used in image script must be passed
         env \
@@ -588,7 +588,4 @@ if [ "$1" = "release" -o "$1" = "mkimage" -o "$1" = "amlpkg" -o "$1" = "noobs" ]
     # cleanup release dir
     rm -rf $RELEASE_DIR
   fi
-
-  #cleanup unneeded files
-  [ "$PROJECT" == "Amlogic" ] && rm -rf $TARGET_IMG/$IMAGE_NAME.system $TARGET_IMG/$IMAGE_NAME.kernel
 fi

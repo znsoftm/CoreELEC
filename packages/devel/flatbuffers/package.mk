@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: GPL-2.0-or-later
+# SPDX-License-Identifier: GPL-2.0
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="flatbuffers"
@@ -23,7 +23,7 @@ PKG_CMAKE_OPTS_HOST="-DFLATBUFFERS_CODE_COVERAGE=OFF \
 PKG_CMAKE_OPTS_TARGET="-DFLATBUFFERS_CODE_COVERAGE=OFF \
                        -DFLATBUFFERS_BUILD_TESTS=OFF \
                        -DFLATBUFFERS_INSTALL=ON \
-                       -DFLATBUFFERS_BUILD_FLATLIB=OFF \
+                       -DFLATBUFFERS_BUILD_FLATLIB=ON \
                        -DFLATBUFFERS_BUILD_FLATC=OFF \
                        -DFLATBUFFERS_BUILD_FLATHASH=OFF \
                        -DFLATBUFFERS_BUILD_GRPCTEST=OFF \

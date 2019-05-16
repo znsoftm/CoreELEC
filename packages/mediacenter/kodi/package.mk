@@ -1,6 +1,6 @@
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: GPL-2.0-or-later
 # Copyright (C) 2009-2016 Stephan Raue (stephan@openelec.tv)
-# Copyright (C) 2017-present Team LibreELEC (https://libreelec.tv)
+# Copyright (C) 2017-2019 Team LibreELEC (https://libreelec.tv)
 # Copyright (C) 2018-present Team CoreELEC (https://coreelec.tv)
 
 PKG_NAME="kodi"
@@ -12,21 +12,27 @@ PKG_LONGDESC="A free and open source cross-platform media player."
 PKG_PATCH_DIRS="$KODI_VENDOR"
 
 case $KODI_VENDOR in
+  amlogic-4.9)
+    PKG_VERSION="bcedf01022ba46459d1be7620184539981a39d08"
+    PKG_SHA256="e7d948b09204b877b11d7da4cda940d544b30ba3c058866a2f26d8bec7831226"
+    PKG_URL="https://github.com/CoreELEC/xbmc/archive/$PKG_VERSION.tar.gz"
+    PKG_SOURCE_NAME="kodi-$PKG_VERSION.tar.gz"
+    ;;
   raspberrypi)
-    PKG_VERSION="newclock5_18.1-Leia"
-    PKG_SHA256="22a46122a8e6f5a6507baae8e6be6beaf5a4203358478c94da525187b0681b99"
+    PKG_VERSION="newclock5_18.2-Leia"
+    PKG_SHA256="ff3f1770dd7a3223fb1f9441c0abf028bb4c3d406c5d9ba6fe202872b7237ee5"
     PKG_URL="https://github.com/popcornmix/xbmc/archive/$PKG_VERSION.tar.gz"
     PKG_SOURCE_NAME="kodi-$KODI_VENDOR-$PKG_VERSION.tar.gz"
     ;;
   rockchip)
-    PKG_VERSION="rockchip_18.1-Leia"
-    PKG_SHA256="974a3b273462e99eb405ab0c8aafff5890772cfb0088c2d852aea30917528199"
+    PKG_VERSION="rockchip_18.2-Leia"
+    PKG_SHA256="437b3608bb4ddb4703cc2ee86acb0a4065846244b84fe555d9f4c7b74a49b263"
     PKG_URL="https://github.com/kwiboo/xbmc/archive/$PKG_VERSION.tar.gz"
     PKG_SOURCE_NAME="kodi-$KODI_VENDOR-$PKG_VERSION.tar.gz"
     ;;
   *)
-    PKG_VERSION="18.1-Leia"
-    PKG_SHA256="bc1ef0e271d0b6ce2e1be7546ad4f7d330930d7631cc19a9bbc5f75ddc586166"
+    PKG_VERSION="18.2-Leia"
+    PKG_SHA256="07b8cffc396473523a51354dc95dfffb54a6a456b82cda7ad67dc2c052d99f64"
     PKG_URL="https://github.com/xbmc/xbmc/archive/$PKG_VERSION.tar.gz"
     PKG_SOURCE_NAME="kodi-$PKG_VERSION.tar.gz"
     ;;
@@ -42,8 +48,8 @@ configure_package() {
 
   PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET dbus"
 
-  if [ "$PROJECT" = "Amlogic" ]; then
-    PKG_PATCH_DIRS="amlogic"
+  if [ "$LINUX" = "amlogic-3.14" ]; then
+    PKG_PATCH_DIRS="amlogic-3.14"
   fi
 
   if [ "$DISPLAYSERVER" = "x11" ]; then
@@ -185,6 +191,10 @@ configure_package() {
     KODI_ARCH="-DWITH_CPU=$TARGET_ARCH"
   else
     KODI_ARCH="-DWITH_ARCH=$TARGET_ARCH"
+  fi
+
+  if [ "$PROJECT" = "Amlogic" -o "$PROJECT" = "Amlogic-ng" ]; then
+    PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET amlogic-displayinfo-addon"
   fi
 
   if [ "$DEVICE" = "Slice" -o "$DEVICE" = "Slice3" ]; then
@@ -332,17 +342,12 @@ post_makeinstall_target() {
     xmlstarlet ed -L --subnode "/addons" -t elem -n "addon" -v "script.program.driverselect" $ADDON_MANIFEST
   fi
 
-  if [ "$DEVICE" = "Slice" -o "$DEVICE" = "Slice3" ]; then
-    xmlstarlet ed -L --subnode "/addons" -t elem -n "addon" -v "service.slice" $ADDON_MANIFEST
+  if [ "$PROJECT" = "Amlogic-ng" -o "$PROJECT" = "Amlogic" ]; then
+    xmlstarlet ed -L --subnode "/addons" -t elem -n "addon" -v "script.amlogic.displayinfo" $ADDON_MANIFEST
   fi
 
-  if [ -d $ROOT/addons ]; then
-    mkdir -p $INSTALL/usr/share/kodi/addons
-    for i in `ls $ROOT/addons | grep zip`
-    do
-      unzip $ROOT/addons/$i -d $INSTALL/usr/share/kodi/addons
-      xmlstarlet ed -L --subnode "/addons" -t elem -n "addon" -v "`unzip -p $ROOT/addons/$i */addon.xml | awk -F= '/addon\ id=/ { print $2 }' | awk -F'"' '{ print $2 }'`" $ADDON_MANIFEST
-    done
+  if [ "$DEVICE" = "Slice" -o "$DEVICE" = "Slice3" ]; then
+    xmlstarlet ed -L --subnode "/addons" -t elem -n "addon" -v "service.slice" $ADDON_MANIFEST
   fi
 
   # more binaddons cross compile badness meh
