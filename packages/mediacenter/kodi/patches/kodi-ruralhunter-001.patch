@@ -1,21 +1,8 @@
-diff --git a/addons/metadata.themoviedb.org/resources/settings.xml b/addons/metadata.themoviedb.org/resources/settings.xml
-index 52b299a..5025b0c 100644
---- a/addons/metadata.themoviedb.org/resources/settings.xml
-+++ b/addons/metadata.themoviedb.org/resources/settings.xml
-@@ -3,7 +3,7 @@
-     <setting label="30005" type="bool" id="keeporiginaltitle" default="false"/>
-     <setting label="30000" type="bool" id="fanart" default="true"/>
-     <setting label="30004" type="bool" id="trailer" default="true"/>
--    <setting label="30002" type="select" values="ar-AE|ar-SA|bg|bn-BD|ca-ES|ch-GU|cs|da|de|el|en|eo-EO|es|es-MX|eu-ES|fa|fa-ir|fi|fr|fr-CA|gl|he|hi-IN|hr|hu|id-ID|it|ja|ka-GE|ko|lt-LT|lv-LV|ml-IN|nb|nl|no|pl|pt|pt-br|ro|ru|sk|sl|sr|sv|ta-IN|th|tr|uk|vi-VN|zh-cn|zh-tw" id="language" default="en"/>
-+    <setting label="30002" type="select" values="ar-AE|ar-SA|bg|bn-BD|ca-ES|ch-GU|cs|da|de|el|en|eo-EO|es|es-MX|eu-ES|fa|fa-ir|fi|fr|fr-CA|gl|he|hi-IN|hr|hu|id-ID|it|ja|ka-GE|ko|lt-LT|lv-LV|ml-IN|nb|nl|no|pl|pt|pt-br|ro|ru|sk|sl|sr|sv|ta-IN|th|tr|uk|vi-VN|zh|zh-tw" id="language" default="en"/>
-     <setting label="30006" type="select" values="au|bg|br|ca|cz|ge|de|dk|ee|es|fi|fr|gb|gr|hr|hu|id|il|in|it|ir|jp|kr|lt|lv|mx|nl|no|pl|pt|ru|si|sv|th|tr|ua|us|vn|zh" id="tmdbcertcountry" default="us"/>
-     <setting label="30003" type="labelenum" values="TMDb|IMDb" id="RatingS" default="TMDb"/>
- 	<setting label="30007" type="bool" id="imdbanyway" visible="eq(-1,0)" default="false"/>
 diff --git a/xbmc/FileItem.cpp b/xbmc/FileItem.cpp
-index f184899..7aebdb0 100644
+index 2a423fc..0d3c0c4 100644
 --- a/xbmc/FileItem.cpp
 +++ b/xbmc/FileItem.cpp
-@@ -1094,7 +1094,8 @@ bool CFileItem::IsDVDFile(bool bVobs /*= true*/, bool bIfos /*= true*/) const
+@@ -1118,7 +1118,8 @@ bool CFileItem::IsDVDFile(bool bVobs /*= true*/, bool bIfos /*= true*/) const
  bool CFileItem::IsBDFile() const
  {
    std::string strFileName = URIUtils::GetFileName(m_strPath);
@@ -25,7 +12,7 @@ index f184899..7aebdb0 100644
  }
  
  bool CFileItem::IsRAR() const
-@@ -1704,6 +1705,14 @@ std::string CFileItem::GetOpticalMediaPath() const
+@@ -1728,6 +1729,14 @@ std::string CFileItem::GetOpticalMediaPath() const
    path = URIUtils::AddFileToFolder(GetPath(), "BDMV", "index.bdmv");
    if (CFile::Exists(path))
      return path;
@@ -55,7 +42,7 @@ index ec6be71..aac45e2 100644
  #endif
    else if(StringUtils::StartsWithNoCase(file, "rtp://") ||
 diff --git a/xbmc/cores/VideoPlayer/VideoPlayer.cpp b/xbmc/cores/VideoPlayer/VideoPlayer.cpp
-index e5bfc1a..6150d9b 100644
+index d8840ce..a13c02b 100644
 --- a/xbmc/cores/VideoPlayer/VideoPlayer.cpp
 +++ b/xbmc/cores/VideoPlayer/VideoPlayer.cpp
 @@ -966,9 +966,9 @@ void CVideoPlayer::OpenDefaultStreams(bool reset)
@@ -85,10 +72,10 @@ index 8f0a832..a6d9c96 100644
    m_discStubExtensions = ".disc";
    // internal music extensions
 diff --git a/xbmc/video/VideoDatabase.cpp b/xbmc/video/VideoDatabase.cpp
-index 28f88c5..ec9265d 100644
+index 1b96904..167cab0 100644
 --- a/xbmc/video/VideoDatabase.cpp
 +++ b/xbmc/video/VideoDatabase.cpp
-@@ -8756,7 +8756,7 @@ void CVideoDatabase::CleanDatabase(CGUIDialogProgressBarHandle* handle, const st
+@@ -8837,7 +8837,7 @@ void CVideoDatabase::CleanDatabase(CGUIDialogProgressBarHandle* handle, const st
      }
      m_pDS2->close();
  
@@ -97,7 +84,7 @@ index 28f88c5..ec9265d 100644
  
      // Add any files that don't have a valid idPath entry to the filesToDelete list.
      m_pDS->query("SELECT files.idFile FROM files WHERE NOT EXISTS (SELECT 1 FROM path WHERE path.idPath = files.idPath)");
-@@ -8764,7 +8764,7 @@ void CVideoDatabase::CleanDatabase(CGUIDialogProgressBarHandle* handle, const st
+@@ -8845,7 +8845,7 @@ void CVideoDatabase::CleanDatabase(CGUIDialogProgressBarHandle* handle, const st
      {
        std::string file = m_pDS->fv("files.idFile").get_asString() + ",";
        filesToTestForDelete += file;
@@ -106,7 +93,7 @@ index 28f88c5..ec9265d 100644
  
        m_pDS->next();
      }
-@@ -8793,14 +8793,17 @@ void CVideoDatabase::CleanDatabase(CGUIDialogProgressBarHandle* handle, const st
+@@ -8874,14 +8874,17 @@ void CVideoDatabase::CleanDatabase(CGUIDialogProgressBarHandle* handle, const st
  
      if (!filesToDelete.empty())
      {
@@ -126,7 +113,7 @@ index 28f88c5..ec9265d 100644
        int pathHashCount = m_pDS->num_rows();
        while (!m_pDS->eof())
        {
-@@ -8810,7 +8813,7 @@ void CVideoDatabase::CleanDatabase(CGUIDialogProgressBarHandle* handle, const st
+@@ -8891,7 +8894,7 @@ void CVideoDatabase::CleanDatabase(CGUIDialogProgressBarHandle* handle, const st
        CLog::LogF(LOGDEBUG, LOGDATABASE, "Cleaned {} path hashes", pathHashCount);
  
        CLog::Log(LOGDEBUG, LOGDATABASE, "%s: Cleaning files table", __FUNCTION__);
@@ -135,7 +122,7 @@ index 28f88c5..ec9265d 100644
        m_pDS->exec(sql);
      }
  
-@@ -8989,7 +8992,7 @@ void CVideoDatabase::CleanDatabase(CGUIDialogProgressBarHandle* handle, const st
+@@ -9070,7 +9073,7 @@ void CVideoDatabase::CleanDatabase(CGUIDialogProgressBarHandle* handle, const st
  }
  
  std::vector<int> CVideoDatabase::CleanMediaType(const std::string &mediaType, const std::string &cleanableFileIDs,
@@ -144,7 +131,7 @@ index 28f88c5..ec9265d 100644
  {
    std::vector<int> cleanedIDs;
    if (mediaType.empty() || cleanableFileIDs.empty())
-@@ -9019,19 +9022,18 @@ std::vector<int> CVideoDatabase::CleanMediaType(const std::string &mediaType, co
+@@ -9100,19 +9103,18 @@ std::vector<int> CVideoDatabase::CleanMediaType(const std::string &mediaType, co
      return cleanedIDs;
  
    // now grab them media items
@@ -170,7 +157,7 @@ index 28f88c5..ec9265d 100644
  
    VECSOURCES videoSources(*CMediaSourceSettings::GetInstance().GetSources("video"));
    g_mediaManager.GetRemovableDrives(videoSources);
-@@ -9042,6 +9044,8 @@ std::vector<int> CVideoDatabase::CleanMediaType(const std::string &mediaType, co
+@@ -9123,6 +9125,8 @@ std::vector<int> CVideoDatabase::CleanMediaType(const std::string &mediaType, co
    while (!m_pDS2->eof())
    {
      bool del = true;
@@ -179,7 +166,7 @@ index 28f88c5..ec9265d 100644
      if (m_pDS2->fv(3).get_isNull() == false)
      {
        std::string parentPath = m_pDS2->fv(3).get_asString();
-@@ -9050,7 +9054,7 @@ std::vector<int> CVideoDatabase::CleanMediaType(const std::string &mediaType, co
+@@ -9131,7 +9135,7 @@ std::vector<int> CVideoDatabase::CleanMediaType(const std::string &mediaType, co
        SScanSettings scanSettings;
        std::string sourcePath;
        GetSourcePath(parentPath, sourcePath, scanSettings);
@@ -188,7 +175,7 @@ index 28f88c5..ec9265d 100644
        bool bIsSourceName;
        bool sourceNotFound = (CUtil::GetMatchingSource(parentPath, videoSources, bIsSourceName) < 0);
  
-@@ -9068,9 +9072,9 @@ std::vector<int> CVideoDatabase::CleanMediaType(const std::string &mediaType, co
+@@ -9149,9 +9153,9 @@ std::vector<int> CVideoDatabase::CleanMediaType(const std::string &mediaType, co
          if (sourcePathNotExists)
          {
            // in silent mode assume that the files are just temporarily missing
@@ -200,7 +187,7 @@ index 28f88c5..ec9265d 100644
            {
              CGUIDialogYesNo* pDialog = CServiceBroker::GetGUI()->GetWindowManager().GetWindow<CGUIDialogYesNo>(WINDOW_DIALOG_YES_NO);
              if (pDialog != NULL)
-@@ -9085,6 +9089,8 @@ std::vector<int> CVideoDatabase::CleanMediaType(const std::string &mediaType, co
+@@ -9166,6 +9170,8 @@ std::vector<int> CVideoDatabase::CleanMediaType(const std::string &mediaType, co
                del = !pDialog->IsConfirmed();
              }
            }
@@ -209,7 +196,7 @@ index 28f88c5..ec9265d 100644
          }
  
          sourcePathsDeleteDecisions.insert(std::make_pair(sourcePathID, std::make_pair(sourcePathNotExists, del)));
-@@ -9102,8 +9108,10 @@ std::vector<int> CVideoDatabase::CleanMediaType(const std::string &mediaType, co
+@@ -9183,8 +9189,10 @@ std::vector<int> CVideoDatabase::CleanMediaType(const std::string &mediaType, co
  
      if (del)
      {
@@ -223,10 +210,10 @@ index 28f88c5..ec9265d 100644
  
      m_pDS2->next();
 diff --git a/xbmc/video/VideoDatabase.h b/xbmc/video/VideoDatabase.h
-index b4d7542..d8fe452 100644
+index addc77e..151a4ad 100644
 --- a/xbmc/video/VideoDatabase.h
 +++ b/xbmc/video/VideoDatabase.h
-@@ -998,7 +998,7 @@ private:
+@@ -1010,7 +1010,7 @@ private:
    std::string GetSafeFile(const std::string &dir, const std::string &name) const;
  
    std::vector<int> CleanMediaType(const std::string &mediaType, const std::string &cleanableFileIDs,
@@ -236,7 +223,7 @@ index b4d7542..d8fe452 100644
    static void AnnounceRemove(std::string content, int id, bool scanning = false);
    static void AnnounceUpdate(std::string content, int id);
 diff --git a/xbmc/video/VideoInfoScanner.cpp b/xbmc/video/VideoInfoScanner.cpp
-index 49e9b18..3c83bbe 100644
+index 9014dee..afb0908 100644
 --- a/xbmc/video/VideoInfoScanner.cpp
 +++ b/xbmc/video/VideoInfoScanner.cpp
 @@ -429,7 +429,7 @@ namespace VIDEO
@@ -248,7 +235,7 @@ index 49e9b18..3c83bbe 100644
        if (info2->Content() == CONTENT_MOVIES || info2->Content() == CONTENT_MUSICVIDEOS)
        {
          if (m_handle)
-@@ -958,6 +958,31 @@ namespace VIDEO
+@@ -961,6 +961,31 @@ namespace VIDEO
              break;
          }
        }
@@ -280,7 +267,7 @@ index 49e9b18..3c83bbe 100644
        x++;
      }
  
-@@ -2052,7 +2077,25 @@ namespace VIDEO
+@@ -2055,7 +2080,25 @@ namespace VIDEO
    {
      MOVIELIST movielist;
      CVideoInfoDownloader imdb(scraper);
