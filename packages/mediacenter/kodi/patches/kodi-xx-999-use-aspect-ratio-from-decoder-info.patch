@@ -1,0 +1,51 @@
+diff --git a/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp b/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp
+index c9fbacb33c..2b2ab632ef 100644
+--- a/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp
++++ b/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp
+@@ -2135,6 +2135,7 @@ float CAMLCodec::GetTimeSize()
+ CDVDVideoCodec::VCReturn CAMLCodec::GetPicture(VideoPicture *pVideoPicture)
+ {
+   std::string vfmt;
++  struct vdec_info vi;
+ 
+   if (!m_opened)
+     return CDVDVideoCodec::VC_ERROR;
+@@ -2155,8 +2156,14 @@ CDVDVideoCodec::VCReturn CAMLCodec::GetPicture(VideoPicture *pVideoPicture)
+     pVideoPicture->dts = DVD_NOPTS_VALUE;
+     pVideoPicture->pts = static_cast<double>(m_cur_pts);
+ 
+-    CLog::Log(LOGDEBUG, LOGVIDEO, "CAMLCodec::GetPicture: index: %u, pts: %0.3lf, dur:%0.3lfms",
+-		m_bufferIndex, pVideoPicture->pts / DVD_TIME_BASE, pVideoPicture->iDuration / 1000);
++    m_dll->codec_get_vdec_info(&am_private->vcodec, &vi);
++    if  (vi.ratio_control ) {
++      m_hints.aspect = 65536.0 / vi.ratio_control;
++      m_processInfo.SetVideoDAR(m_hints.aspect);
++    }
++
++    CLog::Log(LOGDEBUG, LOGVIDEO, "CAMLCodec::GetPicture: index: %u, pts: %0.3lf, dur:%0.0lfms ar:%0.2f",
++		m_bufferIndex, pVideoPicture->pts / DVD_TIME_BASE, pVideoPicture->iDuration / 1000, m_hints.aspect);
+ 
+     return CDVDVideoCodec::VC_PICTURE;
+   }
+diff --git a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecAmlogic.cpp b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecAmlogic.cpp
+index bcbf3e41f9..80eb7203e3 100644
+--- a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecAmlogic.cpp
++++ b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecAmlogic.cpp
+@@ -305,7 +305,7 @@ bool CDVDVideoCodecAmlogic::Open(CDVDStreamInfo &hints, CDVDCodecOptions &option
+   m_processInfo.SetVideoDecoderName(m_pFormatName, true);
+   m_processInfo.SetVideoDimensions(m_hints.width, m_hints.height);
+   m_processInfo.SetVideoDeintMethod("hardware");
+-  m_processInfo.SetVideoDAR(m_hints.aspect);
++//  m_processInfo.SetVideoDAR(m_hints.aspect);
+ 
+   m_has_keyframe = false;
+ 
+@@ -504,7 +504,7 @@ void CDVDVideoCodecAmlogic::FrameRateTracking(uint8_t *pData, int iSize, double
+       m_hints.aspect   = m_mpeg2_sequence->ratio;
+ 
+       m_processInfo.SetVideoFps(m_framerate);
+-      m_processInfo.SetVideoDAR(m_hints.aspect);
++//      m_processInfo.SetVideoDAR(m_hints.aspect);
+     }
+     return;
+   }
