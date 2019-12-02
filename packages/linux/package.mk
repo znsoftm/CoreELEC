@@ -9,7 +9,7 @@ PKG_SITE="http://www.kernel.org"
 PKG_DEPENDS_HOST="ccache:host openssl:host"
 PKG_DEPENDS_TARGET="toolchain linux:host cpio:host kmod:host xz:host wireless-regdb keyutils $KERNEL_EXTRA_DEPENDS_TARGET"
 PKG_DEPENDS_INIT="toolchain"
-PKG_NEED_UNPACK="$LINUX_DEPENDS"
+PKG_NEED_UNPACK="$LINUX_DEPENDS $(get_pkg_directory busybox) $PROJECT_DIR/$PROJECT/initramfs"
 PKG_LONGDESC="This package contains a precompiled kernel image and the modules."
 PKG_IS_KERNEL_PKG="yes"
 PKG_STAMP="$KERNEL_TARGET $KERNEL_MAKE_EXTRACMD $KERNEL_UBOOT_EXTRA_TARGET"
@@ -18,16 +18,16 @@ PKG_PATCH_DIRS="$LINUX"
 
 case "$LINUX" in
   amlogic-3.14)
-    PKG_VERSION="0c5c327129a483a21bd4c295955d4f088449605e"
-    PKG_SHA256="e5a85ebe5c873f6972c93d704520f1a645d96c5a54fd98671e1f344ad0002a00"
+    PKG_VERSION="ed95c4fc0bf54c0f1baa8696d075c7e3b7ca5144"
+    PKG_SHA256="b9224672367153381a8cc3e7eee7256c30d3f7996bb364c2a89fe36aa2cf996e"
     PKG_URL="https://github.com/CoreELEC/linux-amlogic/archive/$PKG_VERSION.tar.gz"
     PKG_SOURCE_NAME="linux-$LINUX-$PKG_VERSION.tar.gz"
     PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET aml-dtbtools:host"
     PKG_BUILD_PERF="no"
     ;;
   amlogic-4.9)
-    PKG_VERSION="f5d105c3d4e8a5dc5afb054ed3db9b6b854669c6"
-    PKG_SHA256="f42835be840393f3c3bddb260ed75ff6414206eb8fc2f52dc0b97d3acc92fa27"
+    PKG_VERSION="6bce4439f6b260a683be664643067323a543bd16"
+    PKG_SHA256="b9feacf7edf84c52e0f9da0cd2e276ca6069b70f432c42739de620e470317935"
     PKG_URL="https://github.com/CoreELEC/linux-amlogic/archive/$PKG_VERSION.tar.gz"
     PKG_SOURCE_NAME="linux-$LINUX-$PKG_VERSION.tar.gz"
     PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET aml-dtbtools:host"
@@ -41,8 +41,8 @@ case "$LINUX" in
     PKG_SOURCE_NAME="linux-$LINUX-$PKG_VERSION.tar.gz"
     ;;
   raspberrypi)
-    PKG_VERSION="fc5826fb999e0b32900d1f487e90c27a92010214" # 4.19.66
-    PKG_SHA256="cd8076d65788ad6e1719f29f3023ea6141c1727a330e1bbc947e3106b320bc2d"
+    PKG_VERSION="3c235dcfe80a7c7ba360219e4a3ecb256f294376" # 4.19.83
+    PKG_SHA256="23a222d8864107b296b3bf580106421899964af879bb7f1c440e875e565fd6f3"
     PKG_URL="https://github.com/raspberrypi/linux/archive/$PKG_VERSION.tar.gz"
     PKG_SOURCE_NAME="linux-$LINUX-$PKG_VERSION.tar.gz"
     ;;
