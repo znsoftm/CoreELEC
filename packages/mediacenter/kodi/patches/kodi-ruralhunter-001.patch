@@ -1,5 +1,5 @@
 diff --git a/xbmc/FileItem.cpp b/xbmc/FileItem.cpp
-index 2a423fc..0d3c0c4 100644
+index 9118fa2..d4823be 100644
 --- a/xbmc/FileItem.cpp
 +++ b/xbmc/FileItem.cpp
 @@ -1118,7 +1118,8 @@ bool CFileItem::IsDVDFile(bool bVobs /*= true*/, bool bIfos /*= true*/) const
@@ -42,7 +42,7 @@ index ec6be71..aac45e2 100644
  #endif
    else if(StringUtils::StartsWithNoCase(file, "rtp://") ||
 diff --git a/xbmc/cores/VideoPlayer/VideoPlayer.cpp b/xbmc/cores/VideoPlayer/VideoPlayer.cpp
-index d8840ce..a13c02b 100644
+index 459d2aa..b3bc7bd 100644
 --- a/xbmc/cores/VideoPlayer/VideoPlayer.cpp
 +++ b/xbmc/cores/VideoPlayer/VideoPlayer.cpp
 @@ -966,9 +966,9 @@ void CVideoPlayer::OpenDefaultStreams(bool reset)
@@ -59,7 +59,7 @@ index d8840ce..a13c02b 100644
        break;
      }
 diff --git a/xbmc/settings/AdvancedSettings.cpp b/xbmc/settings/AdvancedSettings.cpp
-index 8a2442f..b3a8dd3 100644
+index 61dcc3a..bf03057 100644
 --- a/xbmc/settings/AdvancedSettings.cpp
 +++ b/xbmc/settings/AdvancedSettings.cpp
 @@ -429,7 +429,7 @@ void CAdvancedSettings::Initialize()
@@ -72,7 +72,7 @@ index 8a2442f..b3a8dd3 100644
    m_discStubExtensions = ".disc";
    // internal music extensions
 diff --git a/xbmc/video/VideoDatabase.cpp b/xbmc/video/VideoDatabase.cpp
-index 4af4ae8..a9d1d08 100644
+index 2884d16..86560a6 100644
 --- a/xbmc/video/VideoDatabase.cpp
 +++ b/xbmc/video/VideoDatabase.cpp
 @@ -8837,7 +8837,7 @@ void CVideoDatabase::CleanDatabase(CGUIDialogProgressBarHandle* handle, const st
