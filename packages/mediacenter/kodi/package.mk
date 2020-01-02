@@ -8,8 +8,7 @@ PKG_LICENSE="GPL"
 PKG_SITE="http://www.kodi.tv"
 PKG_DEPENDS_TARGET="toolchain JsonSchemaBuilder:host TexturePacker:host Python2 zlib systemd lzo pcre swig:host libass curl fontconfig fribidi tinyxml libjpeg-turbo freetype libcdio taglib libxml2 libxslt rapidjson sqlite ffmpeg crossguid giflib libdvdnav libhdhomerun libfmt lirc libfstrcmp flatbuffers:host flatbuffers"
 PKG_LONGDESC="A free and open source cross-platform media player."
-PKG_TOOLCHAIN="cmake-make"
-PKG_NEED_UNPACK="$(get_pkg_directory ffmpeg) $(get_build_dir ffmpeg) $PROJECT_DIR/$PROJECT/kodi"
+
 PKG_PATCH_DIRS="$KODI_VENDOR"
 
 case $KODI_VENDOR in
@@ -21,8 +20,8 @@ case $KODI_VENDOR in
     PKG_PATCH_DIRS="default"
     ;;
   amlogic-4.9)
-    PKG_VERSION="154390fc8b699c238d0d172b05cca401b262608e"
-    PKG_SHA256="47e7bc8ab58ef7f83548dccd73eb7602e0aca5a69fa916398e194a7a3a8f0989"
+    PKG_VERSION="76b9459d06274be80ca94468fd9fd934a30483ea"
+    PKG_SHA256="7d407b6379ae56ed548c562d88196803c05ba77d7256b6a7aaa2f8cbc017a9df"
     PKG_URL="https://github.com/CoreELEC/xbmc/archive/$PKG_VERSION.tar.gz"
     PKG_SOURCE_NAME="kodi-$PKG_VERSION.tar.gz"
     PKG_PATCH_DIRS="default"
