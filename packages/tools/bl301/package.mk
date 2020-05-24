@@ -2,8 +2,8 @@
 # Copyright (C) 2018-present Team CoreELEC (https://coreelec.org)
 
 PKG_NAME="bl301"
-PKG_VERSION="a824623258d3f92b89303f6ae4e4d1047022c032"
-PKG_SHA256="b451dd91649a6e6ecc689bc42e563491be39d292fd383bf0aba988499c30d6e8"
+PKG_VERSION="3ecca642b45ccc9ddba1ca63b4f42a8855c70b30"
+PKG_SHA256="c7aca05db81f6a4f27449e8945657feae14c0fde060b47d5e920ba0524ef4eed"
 PKG_LICENSE="GPL"
 PKG_SITE="https://coreelec.org"
 PKG_URL="https://github.com/CoreELEC/bl301/archive/$PKG_VERSION.tar.gz"
@@ -11,28 +11,32 @@ PKG_DEPENDS_TARGET="toolchain gcc-linaro-aarch64-elf:host gcc-linaro-arm-eabi:ho
 PKG_LONGDESC="Das U-Boot is a cross-platform bootloader for embedded systems."
 PKG_TOOLCHAIN="manual"
 
+pre_make_target() {
+  sed -i "s|arm-none-eabi-|arm-eabi-|g" $PKG_BUILD/Makefile $PKG_BUILD/arch/arm/cpu/armv8/*/firmware/scp_task/Makefile 2>/dev/null || true
+}
+
 make_target() {
   [ "${BUILD_WITH_DEBUG}" = "yes" ] && PKG_DEBUG=1 || PKG_DEBUG=0
   export PATH=$TOOLCHAIN/lib/gcc-linaro-aarch64-elf/bin/:$TOOLCHAIN/lib/gcc-linaro-arm-eabi/bin/:$PATH
   DEBUG=${PKG_DEBUG} CROSS_COMPILE=aarch64-elf- ARCH=arm CFLAGS="" LDFLAGS="" make mrproper
 
-  for PKG_BL301_SUBDEVICE in ${BL301_SUBDEVICES}; do
-    PKG_UBOOT_CONFIG=${PKG_BL301_SUBDEVICE}_defconfig
-
-    if [[ -f "${PKG_BUILD}/configs/${PKG_UBOOT_CONFIG,,}" ]]; then
-      echo Building bl301 for ${PKG_BL301_SUBDEVICE}
-      DEBUG=${PKG_DEBUG} CROSS_COMPILE=aarch64-elf- ARCH=arm CFLAGS="" LDFLAGS="" make ${PKG_UBOOT_CONFIG,,}
-      DEBUG=${PKG_DEBUG} CROSS_COMPILE=aarch64-elf- ARCH=arm CFLAGS="" LDFLAGS="" make HOSTCC="${HOST_CC}" HOSTSTRIP="true" bl301.bin
-      mv ${PKG_BUILD}/build/scp_task/bl301.bin ${PKG_BUILD}/build/${PKG_BL301_SUBDEVICE}_bl301.bin
-      echo "moved to: " ${PKG_BUILD}/build/${PKG_BL301_SUBDEVICE}_bl301.bin
-    fi
+  for f in $(find ${PKG_BUILD}/configs -mindepth 1); do
+    PKG_UBOOT_CONFIG=$(basename -- "$f")
+    PKG_BL301_SUBDEVICE=${PKG_UBOOT_CONFIG%_defconfig}
+    echo Building bl301 for ${PKG_BL301_SUBDEVICE}
+    DEBUG=${PKG_DEBUG} CROSS_COMPILE=aarch64-elf- ARCH=arm CFLAGS="" LDFLAGS="" make ${PKG_UBOOT_CONFIG}
+    DEBUG=${PKG_DEBUG} CROSS_COMPILE=aarch64-elf- ARCH=arm CFLAGS="" LDFLAGS="" make HOSTCC="${HOST_CC}" HOSTSTRIP="true" bl301.bin
+    mv ${PKG_BUILD}/build/scp_task/bl301.bin ${PKG_BUILD}/build/${PKG_BL301_SUBDEVICE}_bl301.bin
+    echo "moved blob to: " ${PKG_BUILD}/build/${PKG_BL301_SUBDEVICE}_bl301.bin
   done
 }
 
 makeinstall_target() {
   mkdir -p ${INSTALL}/usr/share/bootloader/bl301
 
-  for PKG_BL301_SUBDEVICE in ${BL301_SUBDEVICES}; do
+  for f in $(find ${PKG_BUILD}/configs -mindepth 1); do
+    PKG_UBOOT_CONFIG=$(basename -- "$f")
+    PKG_BL301_SUBDEVICE=${PKG_UBOOT_CONFIG%_defconfig}
     PKG_BIN=${PKG_BUILD}/build/${PKG_BL301_SUBDEVICE}_bl301.bin
     cp -av ${PKG_BIN} ${INSTALL}/usr/share/bootloader/bl301/${PKG_BL301_SUBDEVICE}_bl301.bin
   done

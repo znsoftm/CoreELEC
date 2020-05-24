@@ -2,14 +2,18 @@
 # Copyright (C) 2018-present Team CoreELEC (https://coreelec.org)
 
 PKG_NAME="u-boot-Odroid_N2"
-PKG_VERSION="f7b5ff38d799eaa19401ec68483b5851407ebf01"
-PKG_SHA256="c2baa808792891fd981049f1da4c9fd0f552e15eb0c942a67f1c8ae564c52c23"
+PKG_VERSION="948d3cd368b5f3f46566fe5479714a876330a3ec"
+PKG_SHA256="0972007c5e1f2ff628ee43f38b7a45f1ad7d9633200bc011984d20d8a7d9f8ff"
 PKG_LICENSE="GPL"
 PKG_SITE="https://www.denx.de/wiki/U-Boot"
 PKG_URL="https://github.com/CoreELEC/u-boot/archive/$PKG_VERSION.tar.gz"
 PKG_DEPENDS_TARGET="toolchain gcc-linaro-aarch64-elf:host gcc-linaro-arm-eabi:host"
 PKG_LONGDESC="Das U-Boot is a cross-platform bootloader for embedded systems."
 PKG_TOOLCHAIN="manual"
+
+pre_make_target() {
+  sed -i "s|arm-none-eabi-|arm-eabi-|g" $PKG_BUILD/Makefile $PKG_BUILD/arch/arm/cpu/armv8/*/firmware/scp_task/Makefile 2>/dev/null || true
+}
 
 configure_package() {
   PKG_UBOOT_CONFIG="odroidn2_defconfig"
