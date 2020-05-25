@@ -1,8 +1,8 @@
 diff --git a/xbmc/FileItem.cpp b/xbmc/FileItem.cpp
-index 9118fa2..d4823be 100644
+index 928a43a..dad7f88 100644
 --- a/xbmc/FileItem.cpp
 +++ b/xbmc/FileItem.cpp
-@@ -1118,7 +1118,8 @@ bool CFileItem::IsDVDFile(bool bVobs /*= true*/, bool bIfos /*= true*/) const
+@@ -1119,7 +1119,8 @@ bool CFileItem::IsDVDFile(bool bVobs /*= true*/, bool bIfos /*= true*/) const
  bool CFileItem::IsBDFile() const
  {
    std::string strFileName = URIUtils::GetFileName(m_strPath);
@@ -12,7 +12,7 @@ index 9118fa2..d4823be 100644
  }
  
  bool CFileItem::IsRAR() const
-@@ -1728,6 +1729,14 @@ std::string CFileItem::GetOpticalMediaPath() const
+@@ -1739,6 +1740,14 @@ std::string CFileItem::GetOpticalMediaPath() const
    path = URIUtils::AddFileToFolder(GetPath(), "BDMV", "index.bdmv");
    if (CFile::Exists(path))
      return path;
