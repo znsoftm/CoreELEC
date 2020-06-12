@@ -1,5 +1,18 @@
+diff --git a/tools/depends/target/libbluray/Makefile b/tools/depends/target/libbluray/Makefile
+index 11793a7769..60c1856d44 100644
+--- a/tools/depends/target/libbluray/Makefile
++++ b/tools/depends/target/libbluray/Makefile
+@@ -3,7 +3,7 @@ DEPS= ../../Makefile.include Makefile tvos.patch
+ 
+ # lib name, version
+ LIBNAME=libbluray
+-VERSION=1.0.2
++VERSION=1.2.0
+ SOURCE=$(LIBNAME)-$(VERSION)
+ ARCHIVE=$(SOURCE).tar.bz2
+ 
 diff --git a/xbmc/FileItem.cpp b/xbmc/FileItem.cpp
-index 928a43a..dad7f88 100644
+index 928a43a776..dad7f88bda 100644
 --- a/xbmc/FileItem.cpp
 +++ b/xbmc/FileItem.cpp
 @@ -1119,7 +1119,8 @@ bool CFileItem::IsDVDFile(bool bVobs /*= true*/, bool bIfos /*= true*/) const
@@ -28,7 +41,7 @@ index 928a43a..dad7f88 100644
    return std::string();
  }
 diff --git a/xbmc/cores/VideoPlayer/DVDInputStreams/DVDFactoryInputStream.cpp b/xbmc/cores/VideoPlayer/DVDInputStreams/DVDFactoryInputStream.cpp
-index ec6be71..aac45e2 100644
+index ec6be71976..aac45e2818 100644
 --- a/xbmc/cores/VideoPlayer/DVDInputStreams/DVDFactoryInputStream.cpp
 +++ b/xbmc/cores/VideoPlayer/DVDInputStreams/DVDFactoryInputStream.cpp
 @@ -89,7 +89,8 @@ std::shared_ptr<CDVDInputStream> CDVDFactoryInputStream::CreateInputStream(IVide
@@ -42,7 +55,7 @@ index ec6be71..aac45e2 100644
  #endif
    else if(StringUtils::StartsWithNoCase(file, "rtp://") ||
 diff --git a/xbmc/cores/VideoPlayer/VideoPlayer.cpp b/xbmc/cores/VideoPlayer/VideoPlayer.cpp
-index 459d2aa..b3bc7bd 100644
+index 4f9cb28646..a2c194df3a 100644
 --- a/xbmc/cores/VideoPlayer/VideoPlayer.cpp
 +++ b/xbmc/cores/VideoPlayer/VideoPlayer.cpp
 @@ -966,9 +966,9 @@ void CVideoPlayer::OpenDefaultStreams(bool reset)
@@ -59,7 +72,7 @@ index 459d2aa..b3bc7bd 100644
        break;
      }
 diff --git a/xbmc/settings/AdvancedSettings.cpp b/xbmc/settings/AdvancedSettings.cpp
-index 61dcc3a..bf03057 100644
+index 61dcc3ac7d..bf03057dcc 100644
 --- a/xbmc/settings/AdvancedSettings.cpp
 +++ b/xbmc/settings/AdvancedSettings.cpp
 @@ -429,7 +429,7 @@ void CAdvancedSettings::Initialize()
@@ -72,7 +85,7 @@ index 61dcc3a..bf03057 100644
    m_discStubExtensions = ".disc";
    // internal music extensions
 diff --git a/xbmc/video/VideoDatabase.cpp b/xbmc/video/VideoDatabase.cpp
-index 2884d16..86560a6 100644
+index 2884d16833..86560a6bc3 100644
 --- a/xbmc/video/VideoDatabase.cpp
 +++ b/xbmc/video/VideoDatabase.cpp
 @@ -8837,7 +8837,7 @@ void CVideoDatabase::CleanDatabase(CGUIDialogProgressBarHandle* handle, const st
@@ -210,7 +223,7 @@ index 2884d16..86560a6 100644
  
      m_pDS2->next();
 diff --git a/xbmc/video/VideoDatabase.h b/xbmc/video/VideoDatabase.h
-index 6297327..853223f 100644
+index 6297327140..853223f234 100644
 --- a/xbmc/video/VideoDatabase.h
 +++ b/xbmc/video/VideoDatabase.h
 @@ -1010,7 +1010,7 @@ private:
@@ -223,7 +236,7 @@ index 6297327..853223f 100644
    static void AnnounceRemove(std::string content, int id, bool scanning = false);
    static void AnnounceUpdate(std::string content, int id);
 diff --git a/xbmc/video/VideoInfoScanner.cpp b/xbmc/video/VideoInfoScanner.cpp
-index 9014dee..afb0908 100644
+index 9014dee076..afb090868b 100644
 --- a/xbmc/video/VideoInfoScanner.cpp
 +++ b/xbmc/video/VideoInfoScanner.cpp
 @@ -429,7 +429,7 @@ namespace VIDEO
