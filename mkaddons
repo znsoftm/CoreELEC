@@ -1,2 +1,2 @@
 #!/bin/bash
-PROJECT=Amlogic ARCH=arm DEVICE=Phicomm-N1 CUSTOM_VERSION=9.2.2 scripts/create_addon all
+PROJECT=Amlogic ARCH=arm DEVICE=Phicomm-N1 CUSTOM_VERSION=9.2.3 scripts/create_addon all
