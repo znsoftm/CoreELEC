@@ -1,8 +1,10 @@
 # CoreELEC for Phicomm N1
 1. Only installation on USB drivers is verified.
 2. Auto update is disabled.
-3. To update, put the update package(CoreELEC-Phicomm-N1.arm-xxx.tar) in /storage/.update/, then reboot.
-4. Added ipset module in kernel
+3. Added ipset module in kernel
+
+# Upgrade
+Put the update package(CoreELEC-Phicomm-N1.arm-xxx.tar) in /storage/.update/, then reboot.
 
 # CoreELEC
 
