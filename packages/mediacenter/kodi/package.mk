@@ -13,15 +13,15 @@ PKG_PATCH_DIRS="$KODI_VENDOR"
 
 case $KODI_VENDOR in
   amlogic-3.14)
-    PKG_VERSION="68422bbb091657b5028201796c50aead97fdc3b7"
-    PKG_SHA256="d84159ea0700ba2a1fb8fd3219628c4b0e3924ef1032b5f00d7930ab41aa5340"
+    PKG_VERSION="5a727c90fb2887c8282c2e6c49b8ce5e426da3f2"
+    PKG_SHA256="3da9b0bdabd550422e291bb38906961124d4fd0cffad64754af519e54cf0b178"
     PKG_URL="https://github.com/CoreELEC/xbmc/archive/$PKG_VERSION.tar.gz"
     PKG_SOURCE_NAME="kodi-$PKG_VERSION.tar.gz"
     PKG_PATCH_DIRS="default coreelec"
     ;;
   amlogic-4.9)
-    PKG_VERSION="23e4b7e61b9424129284f4af5b156fb78fcc9aac"
-    PKG_SHA256="27540eaf9970b4f840e7568e126e5609412fd38aad7f26870b67a713ab5d051b"
+    PKG_VERSION="026552b73abaa24ca8b14c6cda7ba6da8b638156"
+    PKG_SHA256="4030b758cfd93abd205097fdb2d13053f5548dc17c1fd2a103b2908d72a18a71"
     PKG_URL="https://github.com/CoreELEC/xbmc/archive/$PKG_VERSION.tar.gz"
     PKG_SOURCE_NAME="kodi-$PKG_VERSION.tar.gz"
     PKG_PATCH_DIRS="default coreelec"
@@ -261,6 +261,7 @@ configure_package() {
                          -DENABLE_DEBUGFISSION=OFF \
                          -DENABLE_APP_AUTONAME=OFF \
                          -DENABLE_INTERNAL_FLATBUFFERS=OFF \
+                         -DENABLE_LCMS2=OFF \
                          $PKG_KODI_USE_LTO \
                          $KODI_ARCH \
                          $KODI_NEON \
@@ -352,10 +353,17 @@ post_makeinstall_target() {
                                 $PROJECT_DIR/$PROJECT/devices/$DEVICE/kodi/advancedsettings.xml \
                                 > $INSTALL/usr/share/kodi/system/advancedsettings.xml
 
+  ln -sf /var/share/kodi/system/settings/appliance.xml $INSTALL/usr/share/kodi/system/settings/appliance.xml
+
   $PKG_DIR/scripts/xml_merge.py $PKG_DIR/config/appliance.xml \
-                                $PROJECT_DIR/$PROJECT/kodi/appliance.xml \
+                                $PROJECT_DIR/$PROJECT/kodi/g12x/appliance.xml \
                                 $PROJECT_DIR/$PROJECT/devices/$DEVICE/kodi/appliance.xml \
-                                > $INSTALL/usr/share/kodi/system/settings/appliance.xml
+                                > $INSTALL/usr/share/kodi/system/settings/appliance.g12x.xml
+
+  $PKG_DIR/scripts/xml_merge.py $PKG_DIR/config/appliance.xml \
+                                $PROJECT_DIR/$PROJECT/kodi/gxx/appliance.xml \
+                                $PROJECT_DIR/$PROJECT/devices/$DEVICE/kodi/appliance.xml \
+                                > $INSTALL/usr/share/kodi/system/settings/appliance.gxx.xml
 
   # update addon manifest
   ADDON_MANIFEST=$INSTALL/usr/share/kodi/system/addon-manifest.xml
