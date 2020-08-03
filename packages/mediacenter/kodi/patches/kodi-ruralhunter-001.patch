@@ -1,16 +1,3 @@
-diff --git a/tools/depends/target/libbluray/Makefile b/tools/depends/target/libbluray/Makefile
-index 11793a7769..60c1856d44 100644
---- a/tools/depends/target/libbluray/Makefile
-+++ b/tools/depends/target/libbluray/Makefile
-@@ -3,7 +3,7 @@ DEPS= ../../Makefile.include Makefile tvos.patch
- 
- # lib name, version
- LIBNAME=libbluray
--VERSION=1.0.2
-+VERSION=1.2.0
- SOURCE=$(LIBNAME)-$(VERSION)
- ARCHIVE=$(SOURCE).tar.bz2
- 
 diff --git a/xbmc/FileItem.cpp b/xbmc/FileItem.cpp
 index 928a43a776..dad7f88bda 100644
 --- a/xbmc/FileItem.cpp
@@ -190,7 +177,7 @@ index 5402816175..fa23d2e8ae 100644
  
      if (!m_pFile)
 diff --git a/xbmc/settings/AdvancedSettings.cpp b/xbmc/settings/AdvancedSettings.cpp
-index 61dcc3ac7d..bf03057dcc 100644
+index 59efd8e959..fa045773d9 100644
 --- a/xbmc/settings/AdvancedSettings.cpp
 +++ b/xbmc/settings/AdvancedSettings.cpp
 @@ -429,7 +429,7 @@ void CAdvancedSettings::Initialize()
