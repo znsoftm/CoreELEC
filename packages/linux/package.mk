@@ -26,8 +26,8 @@ case "$LINUX" in
     PKG_BUILD_PERF="no"
     ;;
   amlogic-4.9)
-    PKG_VERSION="060080b56e0955561d2d7046d52a136c695ca9b1"
-    PKG_SHA256="c229b83541c7664e60d3b2117f2d8a5463d26df8d4b7eac690b168d60733d8e4"
+    PKG_VERSION="0187ddee4c06819b8406a1ed81411868965801d0"
+    PKG_SHA256="731c76cc037ddae22a5e9e43b5181961c496b596866b645d73dc033c6f3cbe3b"
     PKG_URL="https://github.com/CoreELEC/linux-amlogic/archive/$PKG_VERSION.tar.gz"
     PKG_SOURCE_NAME="linux-$LINUX-$PKG_VERSION.tar.gz"
     PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET aml-dtbtools:host"
@@ -43,8 +43,8 @@ case "$LINUX" in
     PKG_SOURCE_NAME="linux-$LINUX-$PKG_VERSION.tar.gz"
     ;;
   raspberrypi)
-    PKG_VERSION="fe2c7bf4cad4641dfb6f12712755515ab15815ca" # 4.19.118
-    PKG_SHA256="ca458e01428927cc12e13e4ef0de219902feeba5fd7f6bcb5056ce33c4688e90"
+    PKG_VERSION="abaa3760da89d6fb38e55473fffc9a31dd0b1d7a" # 4.19.127
+    PKG_SHA256="b7345333ee90949dabc8e7fa184c443dc43781bdd3703e2203ad084274b50f24"
     PKG_URL="https://github.com/raspberrypi/linux/archive/$PKG_VERSION.tar.gz"
     PKG_SOURCE_NAME="linux-$LINUX-$PKG_VERSION.tar.gz"
     ;;
@@ -235,6 +235,12 @@ make_target() {
   # file with symbols from built-in and external modules.
   # Without that it'll contain only the symbols from the kernel
   kernel_make $KERNEL_TARGET $KERNEL_MAKE_EXTRACMD modules
+
+  for ce_dtb in arch/$TARGET_KERNEL_ARCH/boot/dts/amlogic/coreelec-*; do
+    if [ -d $ce_dtb ]; then
+      cp $ce_dtb/*.dtb arch/$TARGET_KERNEL_ARCH/boot/dts/amlogic 2>/dev/null
+    fi
+  done
 
   if [ "$BUILD_ANDROID_BOOTIMG" = "yes" ]; then
     find_file_path bootloader/mkbootimg && source ${FOUND_PATH}
