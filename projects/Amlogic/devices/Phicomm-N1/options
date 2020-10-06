@@ -8,7 +8,7 @@
   # Build Android kernel image using mkbootimg
     BUILD_ANDROID_BOOTIMG="no"
                         
-    ADDITIONAL_PACKAGES="$ADDITIONAL_PACKAGES n1-boot"
+    ADDITIONAL_PACKAGES="$ADDITIONAL_PACKAGES n1-boot ipset"
     
     IR_REMOTE_KEYMAPS="$IR_REMOTE_KEYMAPS mecool"
     

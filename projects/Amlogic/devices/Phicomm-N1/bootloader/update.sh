@@ -105,7 +105,7 @@ fi
 
 if [ -f $UPDATE_DIR/.tmp/*/3rdparty/bootloader/uInitrd ]; then
     echo "Updating uInitrd..."
-    cp -p $UPDATE_DIR/.tmp/*/3rdparty/bootloader/uInitrd $BOOT_ROOT
+    cp $UPDATE_DIR/.tmp/*/3rdparty/bootloader/uInitrd $BOOT_ROOT
     sleep 1
 fi
 

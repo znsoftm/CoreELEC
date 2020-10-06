@@ -2,9 +2,9 @@
 # Copyright (C) 2018-present Team CoreELEC (https://coreelec.org)
 
 PKG_NAME="hyperion.ng"
-PKG_VERSION="74766fd62631a35d90872278b3bf9d88d4dfffdd"
-PKG_SHA256="257d05290dc1bd86bc3f1b84e252af66a6a3876eda77fe3864a96f0ab87f1b9b"
-PKG_REV="101"
+PKG_VERSION="2.0.0-alpha.7"
+PKG_SHA256="adb0c1845a60d9b898ef583198feb2c2572974a1d17caf760a589f3b23dedc0b"
+PKG_REV="104"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/hyperion-project/hyperion.ng"
 PKG_URL="https://github.com/hyperion-project/hyperion.ng/archive/$PKG_VERSION.tar.gz"
@@ -20,7 +20,6 @@ PKG_ADDON_TYPE="xbmc.service"
 # Setting default values
 PKG_PLATFORM="-DPLATFORM=x86"
 PKG_AMLOGIC_SUPPORT="-DENABLE_AMLOGIC=0"
-PKG_V4L2_SUPPORT="-DENABLE_V4L2=1"
 PKG_DISPMANX_SUPPORT="-DENABLE_DISPMANX=0"
 PKG_FB_SUPPORT="-DENABLE_FB=1"
 PKG_X11_SUPPORT="-DENABLE_X11=0"
@@ -30,7 +29,6 @@ if [ "$KODIPLAYER_DRIVER" = "libamcodec" ]; then
   PKG_PLATFORM="-DPLATFORM=amlogic"
   PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET libamcodec"
   PKG_AMLOGIC_SUPPORT="-DENABLE_AMLOGIC=1"
-  PKG_V4L2_SUPPORT="-DENABLE_V4L2=0"
 elif [ "$KODIPLAYER_DRIVER" = "bcm2835-driver" ]; then
   PKG_PLATFORM="-DPLATFORM=rpi"
   PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET bcm2835-driver rpi_ws281x"
@@ -57,11 +55,10 @@ PKG_CMAKE_OPTS_TARGET="-DCMAKE_NO_SYSTEM_FROM_IMPORTED=ON \
                        $PKG_FB_SUPPORT \
                        $PKG_DENABLE_WS281XPWM \
                        $PKG_X11_SUPPORT \
-                       $PKG_V4L2_SUPPORT \
+                       -DENABLE_V4L2=1 \
                        -DENABLE_OSX=0 \
                        -DENABLE_SPIDEV=1 \
                        -DENABLE_TINKERFORGE=0 \
-                       -DENABLE_QT5=1 \
                        -DENABLE_TESTS=0 \
                        -Wno-dev \
                        -DQT_BIN_PATH=$TOOLCHAIN/bin"
@@ -73,6 +70,4 @@ makeinstall_target() {
 addon() {
   mkdir -p $ADDON_BUILD/$PKG_ADDON_ID/bin
     cp $PKG_BUILD/.$TARGET_NAME/bin/* $ADDON_BUILD/$PKG_ADDON_ID/bin
-  cp -PR $PKG_BUILD/assets/webconfig $ADDON_BUILD/$PKG_ADDON_ID
-  cp -PR $PKG_BUILD/effects $ADDON_BUILD/$PKG_ADDON_ID
 }

@@ -1,8 +1,8 @@
 diff --git a/xbmc/FileItem.cpp b/xbmc/FileItem.cpp
-index 9118fa2..d4823be 100644
+index 928a43a776..dad7f88bda 100644
 --- a/xbmc/FileItem.cpp
 +++ b/xbmc/FileItem.cpp
-@@ -1118,7 +1118,8 @@ bool CFileItem::IsDVDFile(bool bVobs /*= true*/, bool bIfos /*= true*/) const
+@@ -1119,7 +1119,8 @@ bool CFileItem::IsDVDFile(bool bVobs /*= true*/, bool bIfos /*= true*/) const
  bool CFileItem::IsBDFile() const
  {
    std::string strFileName = URIUtils::GetFileName(m_strPath);
@@ -12,7 +12,7 @@ index 9118fa2..d4823be 100644
  }
  
  bool CFileItem::IsRAR() const
-@@ -1728,6 +1729,14 @@ std::string CFileItem::GetOpticalMediaPath() const
+@@ -1739,6 +1740,14 @@ std::string CFileItem::GetOpticalMediaPath() const
    path = URIUtils::AddFileToFolder(GetPath(), "BDMV", "index.bdmv");
    if (CFile::Exists(path))
      return path;
@@ -28,7 +28,7 @@ index 9118fa2..d4823be 100644
    return std::string();
  }
 diff --git a/xbmc/cores/VideoPlayer/DVDInputStreams/DVDFactoryInputStream.cpp b/xbmc/cores/VideoPlayer/DVDInputStreams/DVDFactoryInputStream.cpp
-index ec6be71..aac45e2 100644
+index ec6be71976..aac45e2818 100644
 --- a/xbmc/cores/VideoPlayer/DVDInputStreams/DVDFactoryInputStream.cpp
 +++ b/xbmc/cores/VideoPlayer/DVDInputStreams/DVDFactoryInputStream.cpp
 @@ -89,7 +89,8 @@ std::shared_ptr<CDVDInputStream> CDVDFactoryInputStream::CreateInputStream(IVide
@@ -41,8 +41,54 @@ index ec6be71..aac45e2 100644
      return std::shared_ptr<CDVDInputStreamBluray>(new CDVDInputStreamBluray(pPlayer, fileitem));
  #endif
    else if(StringUtils::StartsWithNoCase(file, "rtp://") ||
+diff --git a/xbmc/cores/VideoPlayer/DVDInputStreams/DVDInputStreamFile.cpp b/xbmc/cores/VideoPlayer/DVDInputStreams/DVDInputStreamFile.cpp
+index 0918433b39..8d4fb14b0f 100644
+--- a/xbmc/cores/VideoPlayer/DVDInputStreams/DVDInputStreamFile.cpp
++++ b/xbmc/cores/VideoPlayer/DVDInputStreams/DVDInputStreamFile.cpp
+@@ -7,11 +7,8 @@
+  */
+ 
+ #include "DVDInputStreamFile.h"
+-#include "ServiceBroker.h"
+ #include "filesystem/File.h"
+ #include "filesystem/IFile.h"
+-#include "settings/AdvancedSettings.h"
+-#include "settings/SettingsComponent.h"
+ #include "utils/log.h"
+ #include "utils/URIUtils.h"
+ 
+@@ -49,29 +46,6 @@ bool CDVDInputStreamFile::Open()
+   if (!m_item.IsSubtitle())
+     flags |= READ_AUDIO_VIDEO;
+ 
+-  /*
+-   * There are 5 buffer modes available (configurable in as.xml)
+-   * 0) Buffer all internet filesystems (like 2 but additionally also ftp, webdav, etc.) (default)
+-   * 1) Buffer all filesystems (including local)
+-   * 2) Only buffer true internet filesystems (streams) (http, etc.)
+-   * 3) No buffer
+-   * 4) Buffer all non-local (remote) filesystems
+-   */
+-  if (!URIUtils::IsOnDVD(m_item.GetDynPath()) && !URIUtils::IsBluray(m_item.GetDynPath())) // Never cache these
+-  {
+-    unsigned int iCacheBufferMode = CServiceBroker::GetSettingsComponent()->GetAdvancedSettings()->m_cacheBufferMode;
+-    if ((iCacheBufferMode == CACHE_BUFFER_MODE_INTERNET && URIUtils::IsInternetStream(m_item.GetDynPath(), true))
+-     || (iCacheBufferMode == CACHE_BUFFER_MODE_TRUE_INTERNET && URIUtils::IsInternetStream(m_item.GetDynPath(), false))
+-     || (iCacheBufferMode == CACHE_BUFFER_MODE_REMOTE && URIUtils::IsRemote(m_item.GetDynPath()))
+-     || (iCacheBufferMode == CACHE_BUFFER_MODE_ALL))
+-    {
+-      flags |= READ_CACHED;
+-    }
+-  }
+-
+-  if (!(flags & READ_CACHED))
+-    flags |= READ_NO_CACHE; // Make sure CFile honors our no-cache hint
+-
+   std::string content = m_item.GetMimeType();
+ 
+   if (content == "video/mp4" ||
 diff --git a/xbmc/cores/VideoPlayer/VideoPlayer.cpp b/xbmc/cores/VideoPlayer/VideoPlayer.cpp
-index 459d2aa..b3bc7bd 100644
+index 4f9cb28646..a2c194df3a 100644
 --- a/xbmc/cores/VideoPlayer/VideoPlayer.cpp
 +++ b/xbmc/cores/VideoPlayer/VideoPlayer.cpp
 @@ -966,9 +966,9 @@ void CVideoPlayer::OpenDefaultStreams(bool reset)
@@ -58,8 +104,80 @@ index 459d2aa..b3bc7bd 100644
          visible = true;
        break;
      }
+diff --git a/xbmc/filesystem/File.cpp b/xbmc/filesystem/File.cpp
+index 5402816175..fa23d2e8ae 100644
+--- a/xbmc/filesystem/File.cpp
++++ b/xbmc/filesystem/File.cpp
+@@ -16,13 +16,15 @@
+ #include "Directory.h"
+ #include "FileCache.h"
+ #include "PasswordManager.h"
++#include "ServiceBroker.h"
+ #include "system.h"
+ #include "utils/log.h"
+ #include "utils/URIUtils.h"
+ #include "utils/BitstreamStats.h"
+ #include "Util.h"
+ #include "utils/StringUtils.h"
+-
++#include "settings/AdvancedSettings.h"
++#include "settings/SettingsComponent.h"
+ #include "commons/Exception.h"
+ 
+ using namespace XFILE;
+@@ -281,23 +283,38 @@ bool CFile::Open(const CURL& file, const unsigned int flags)
+         return false;
+     }
+ 
++    /*
++    * There are 5 buffer modes available (configurable in as.xml)
++    * 0) Buffer all internet filesystems (like 2 but additionally also ftp, webdav, etc.)
++    * 1) Buffer all filesystems (including local)
++    * 2) Only buffer true internet filesystems (streams) (http, etc.)
++    * 3) No buffer
++    * 4) Buffer all remote (non-local) filesystems
++    */
+     if (!(m_flags & READ_NO_CACHE))
+     {
+-      const std::string pathToUrl(url.Get());
+-      if (URIUtils::IsInternetStream(url, true) && !CUtil::IsPicture(pathToUrl) )
+-        m_flags |= READ_CACHED;
+-
+-      if (m_flags & READ_CACHED)
++      const std::string pathToUrl(file.Get());
++      if ((m_flags & READ_AUDIO_VIDEO) || URIUtils::IsDVD(pathToUrl) || URIUtils::IsBluray(pathToUrl))
+       {
+-        // for internet stream, if it contains multiple stream, file cache need handle it specially.
+-        m_pFile = new CFileCache(m_flags);
+-
+-        if (!m_pFile)
+-          return false;
+-
+-        return m_pFile->Open(url);
++        const unsigned int iCacheBufferMode = CServiceBroker::GetSettingsComponent()->GetAdvancedSettings()->m_cacheBufferMode;
++        if ((iCacheBufferMode == CACHE_BUFFER_MODE_INTERNET && URIUtils::IsInternetStream(pathToUrl, true))
++        	|| (iCacheBufferMode == CACHE_BUFFER_MODE_TRUE_INTERNET && URIUtils::IsInternetStream(pathToUrl, false))
++        	|| (iCacheBufferMode == CACHE_BUFFER_MODE_REMOTE && URIUtils::IsRemote(pathToUrl))
++        	|| (iCacheBufferMode == CACHE_BUFFER_MODE_ALL))
++        {
++          m_flags |= READ_CACHED;
++        }
+       }
+     }
++    if (m_flags & READ_CACHED)
++    {
++      m_pFile = new CFileCache(m_flags);
++      if (!m_pFile)
++        return false;
++      
++      return m_pFile->Open(url);
++    }
++    
+     m_pFile = CFileFactory::CreateLoader(url);
+ 
+     if (!m_pFile)
 diff --git a/xbmc/settings/AdvancedSettings.cpp b/xbmc/settings/AdvancedSettings.cpp
-index 61dcc3a..bf03057 100644
+index 59efd8e959..fa045773d9 100644
 --- a/xbmc/settings/AdvancedSettings.cpp
 +++ b/xbmc/settings/AdvancedSettings.cpp
 @@ -429,7 +429,7 @@ void CAdvancedSettings::Initialize()
@@ -72,7 +190,7 @@ index 61dcc3a..bf03057 100644
    m_discStubExtensions = ".disc";
    // internal music extensions
 diff --git a/xbmc/video/VideoDatabase.cpp b/xbmc/video/VideoDatabase.cpp
-index 2884d16..86560a6 100644
+index 2884d16833..86560a6bc3 100644
 --- a/xbmc/video/VideoDatabase.cpp
 +++ b/xbmc/video/VideoDatabase.cpp
 @@ -8837,7 +8837,7 @@ void CVideoDatabase::CleanDatabase(CGUIDialogProgressBarHandle* handle, const st
@@ -210,7 +328,7 @@ index 2884d16..86560a6 100644
  
      m_pDS2->next();
 diff --git a/xbmc/video/VideoDatabase.h b/xbmc/video/VideoDatabase.h
-index 6297327..853223f 100644
+index 6297327140..853223f234 100644
 --- a/xbmc/video/VideoDatabase.h
 +++ b/xbmc/video/VideoDatabase.h
 @@ -1010,7 +1010,7 @@ private:
@@ -223,7 +341,7 @@ index 6297327..853223f 100644
    static void AnnounceRemove(std::string content, int id, bool scanning = false);
    static void AnnounceUpdate(std::string content, int id);
 diff --git a/xbmc/video/VideoInfoScanner.cpp b/xbmc/video/VideoInfoScanner.cpp
-index 9014dee..afb0908 100644
+index 9014dee076..afb090868b 100644
 --- a/xbmc/video/VideoInfoScanner.cpp
 +++ b/xbmc/video/VideoInfoScanner.cpp
 @@ -429,7 +429,7 @@ namespace VIDEO

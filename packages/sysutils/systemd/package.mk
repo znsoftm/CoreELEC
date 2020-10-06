@@ -9,7 +9,7 @@ PKG_SHA256="ec22be9a5dd94c9640e6348ed8391d1499af8ca2c2f01109198a414cff6c6cba"
 PKG_LICENSE="LGPL2.1+"
 PKG_SITE="http://www.freedesktop.org/wiki/Software/systemd"
 PKG_URL="https://github.com/systemd/systemd/archive/v$PKG_VERSION.tar.gz"
-PKG_DEPENDS_TARGET="toolchain libcap kmod util-linux entropy libidn2"
+PKG_DEPENDS_TARGET="toolchain libcap kmod util-linux entropy libidn2 wait-time-sync"
 PKG_LONGDESC="A system and session manager for Linux, compatible with SysV and LSB init scripts."
 
 if [ "$PROJECT" = "Amlogic" ]; then
@@ -190,6 +190,10 @@ post_makeinstall_target() {
   # remove networkd
   safe_remove $INSTALL/usr/lib/systemd/network
 
+  # remove systemd-time-wait-sync (not detecting slew time updates, using package wait-time-sync)
+  safe_remove $INSTALL/usr/lib/systemd/system/systemd-time-wait-sync.service
+  safe_remove $INSTALL/usr/lib/systemd/systemd-time-wait-sync
+
   # tune journald.conf
   sed -e "s,^.*Compress=.*$,Compress=no,g" -i $INSTALL/etc/systemd/journald.conf
   sed -e "s,^.*SplitMode=.*$,SplitMode=none,g" -i $INSTALL/etc/systemd/journald.conf
@@ -213,6 +217,12 @@ post_makeinstall_target() {
 
   mkdir -p $INSTALL/usr/sbin
   cp $PKG_DIR/scripts/kernel-overlays-setup $INSTALL/usr/sbin
+  cp $PKG_DIR/scripts/network-base-setup $INSTALL/usr/sbin
+  cp $PKG_DIR/scripts/systemd-timesyncd-setup $INSTALL/usr/sbin
+
+  # /etc/resolv.conf and /etc/hosts must be writable
+  ln -sf /run/libreelec/resolv.conf $INSTALL/etc/resolv.conf
+  ln -sf /run/libreelec/hosts $INSTALL/etc/hosts
 
   # provide 'halt', 'shutdown', 'reboot' & co.
   ln -sf /usr/bin/systemctl $INSTALL/usr/sbin/halt
@@ -235,6 +245,7 @@ post_makeinstall_target() {
   ln -sf /storage/.config/logind.conf.d $INSTALL/etc/systemd/logind.conf.d
   safe_remove $INSTALL/etc/systemd/sleep.conf.d
   ln -sf /storage/.config/sleep.conf.d $INSTALL/etc/systemd/sleep.conf.d
+  ln -sf /storage/.config/timesyncd.conf.d $INSTALL/etc/systemd/timesyncd.conf.d
   safe_remove $INSTALL/etc/sysctl.d
   ln -sf /storage/.config/sysctl.d $INSTALL/etc/sysctl.d
   safe_remove $INSTALL/etc/tmpfiles.d
@@ -273,5 +284,8 @@ post_install() {
   enable_service usercache.service
   enable_service kernel-overlays.service
   enable_service hwdb.service
+  enable_service network-base.service
+  enable_service systemd-timesyncd.service
+  enable_service systemd-timesyncd-setup.service
   enable_service debug-shell.service
 }

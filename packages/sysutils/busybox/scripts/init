@@ -205,7 +205,7 @@ mount_nfs() {
 
   [ "$NFS_OPTIONS" = "$1" ] && NFS_OPTIONS=
 
-  mount_common "$NFS_EXPORT" "$2" "$3,nolock,soft,timeo=3,retrans=2,rsize=32768,wsize=32768,$NFS_OPTIONS" "nfs"
+  mount_common "$NFS_EXPORT" "$2" "$3,nolock,rsize=32768,wsize=32768,$NFS_OPTIONS" "nfs"
 }
 
 mount_ubifs() {
@@ -287,6 +287,14 @@ get_project_arch() {
   fi
 }
 
+# mount the specified SYSTEM file and output version from /etc/os-release
+get_project_version() {
+  if [ -f ${1}/etc/os-release ]; then
+    . ${1}/etc/os-release
+    echo "${VERSION}"
+  fi
+}
+
 # If the project/arch of current matches the update, then it is considered compatible.
 # Otherwise, mount the update SYSTEM partition and, if canupdate.sh is available,
 # call the script to determine if the current update file can be applied on to the
@@ -327,6 +335,21 @@ check_is_compatible() {
       echo ""
       return 1
     fi
+  fi
+
+  return 0
+}
+
+display_versions() {
+  local old_project_version new_project_version
+
+  old_project_version="$(get_project_version "/sysroot")" || return
+  new_project_version="$(get_project_version "/update")" || return
+
+  if [ -n "${old_project_version}" -a -n "${new_project_version}" ]; then
+    echo ""
+    echo "Updating from ${old_project_version} to ${new_project_version}"
+    echo ""
   fi
 
   return 0
@@ -443,10 +466,7 @@ load_splash() {
       if [ -z "$SPLASHIMAGE" ]; then
         vres="$(fbset 2>/dev/null | awk '/geometry/ { print $3 }')"
 
-        for s in /flash/oemsplash-${vres}.png \
-                 /flash/oemsplash-1080.png \
-                 /flash/oemsplash.png \
-                 /splash/splash-${vres}.png \
+        for s in /splash/splash-${vres}.png \
                  /splash/splash-1080.png \
                  ; do
           if [ -f "${s}" ]; then
@@ -562,7 +582,9 @@ check_disks() {
         break
       fi
     done
-    sed -e '/^$/d' -e 's/^/fsck: /' </dev/fsck.latest >/dev/kmsg
+    while read line; do
+      [ -n "$line" ] && echo "fsck: ${line::160}" >/dev/kmsg
+    done </dev/fsck.latest
     rm -f /dev/fsck.latest
   fi
 }
@@ -966,6 +988,7 @@ check_update() {
   fi
 
   # all ok, update
+  display_versions
   if [ -b "/$IMAGE_KERNEL" ]; then
     update_partition "Kernel" "$UPDATE_KERNEL" "/$IMAGE_KERNEL"
   else
@@ -1018,7 +1041,7 @@ check_amlogic_dtb() {
       echo "Please update it to resume normal startup."
       echo ""
 
-      StartProgress countdown "Normal startup in 300s... " 300 "NOW"
+      StartProgress countdown "Normal startup in 30s... " 30 "NOW"
       echo ""
     fi
   fi
@@ -1055,9 +1078,6 @@ delete_descriptors() {
 }
 
 # Do init tasks to bring up system
-
-# hide kernel log messages on console
-echo '1 4 1 7' > /proc/sys/kernel/printk
 
 # set ondemand up_threshold
 if [ -e /sys/devices/system/cpu/cpufreq/ondemand/up_threshold ]; then
@@ -1136,6 +1156,9 @@ for arg in $(cat /proc/cmdline); do
     debugging)
       DEBUG=yes
       ;;
+    nopkmute)
+      MUTE_PRINTK=no
+      ;;
     progress)
       PROGRESS=yes
       INIT_ARGS="$INIT_ARGS --show-status=1"
@@ -1176,8 +1199,16 @@ for arg in $(cat /proc/cmdline); do
     bigfont=*)
       BIGFONT="${arg#*=}"
       ;;
+    ip=*)
+      KERNEL_IPCONFIG="yes"
+      ;;
   esac
 done
+
+# hide kernel log messages on console
+if [ ! "$MUTE_PRINTK" = "no" ]; then
+  echo '1 4 1 7' > /proc/sys/kernel/printk
+fi
 
 if test "$DEBUG" = "yes"; then
   exec 3>&1
@@ -1243,6 +1274,10 @@ fi
 
 if [ "$FLASH_NETBOOT" = "yes" ]; then
   echo "" > /sysroot/dev/.flash_netboot
+fi
+
+if [ "$KERNEL_IPCONFIG" = "yes" ]; then
+  echo "" > /sysroot/dev/.kernel_ipconfig
 fi
 
 # swap can not be used over nfs.(see scripts/mount-swap)

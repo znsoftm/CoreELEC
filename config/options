@@ -90,9 +90,14 @@ VERBOSE="${VERBOSE:-yes}"
 # directory.
 CCACHE_CACHE_SIZE="10G"
 
-# read options from $HOME if available
-if [ -f "${HOME}/.libreelec/options" ]; then
-  . "${HOME}/.libreelec/options"
+# read local persistent options from $ROOT if available
+if [ -f "${ROOT}/.coreelec/options" ]; then
+  . "${ROOT}/.coreelec/options"
+fi
+
+# read global persistent options from $HOME if available
+if [ -f "${HOME}/.coreelec/options" ]; then
+  . "${HOME}/.coreelec/options"
 fi
 
 # overwrite OEM_SUPPORT via commandline

@@ -39,16 +39,23 @@ for arg in $(cat /proc/cmdline); do
 
       if [ -f "/proc/device-tree/coreelec-dt-id" ]; then
         DT_ID=$(cat /proc/device-tree/coreelec-dt-id)
+      elif [ -f "/proc/device-tree/le-dt-id" ]; then
+        DT_ID=$(cat /proc/device-tree/le-dt-id)
       fi
 
       if [ -n "$DT_ID" ]; then
         case $DT_ID in
           *odroid_n2*)
             SUBDEVICE="Odroid_N2"
-            DT_ID=$(echo "$DT_ID" | sed 's/g12b_a311d_odroid_n2/g12b_s922x_odroid_n2/g')
             ;;
-          *khadas_vim3)
-            SUBDEVICE="Khadas_VIM3"
+          *odroid_c4*)
+            SUBDEVICE="Odroid_C4"
+            ;;
+          *lepotato)
+            SUBDEVICE="LePotato"
+            ;;
+          *lafrite)
+            SUBDEVICE="LaFrite"
             ;;
           *)
             SUBDEVICE="Generic"
@@ -62,12 +69,13 @@ for arg in $(cat /proc/cmdline); do
 
       if [ -f "$UPDATE_DTB_SOURCE" ]; then
         echo "Updating device tree from $UPDATE_DTB_SOURCE..."
-        case $boot in
-          /dev/system)
+        case $BOOT_PART in
+          /dev/coreelec)
             dd if=/dev/zero of=/dev/dtb bs=256k count=1 status=none
             dd if="$UPDATE_DTB_SOURCE" of=/dev/dtb bs=256k status=none
+            rm -f "$BOOT_ROOT/dtb.img" # this should not exist, remove if it does
             ;;
-          /dev/*|LABEL=*|UUID=*|FOLDER=*)
+          *)
             cp -f "$UPDATE_DTB_SOURCE" "$BOOT_ROOT/dtb.img"
             ;;
         esac
@@ -122,13 +130,17 @@ if [ -f $SYSTEM_ROOT/usr/share/bootloader/config.ini ]; then
   fi
 fi
 
-if [ "${SUBDEVICE}" == "Odroid_N2" ]; then
+if [ "${SUBDEVICE}" == "Odroid_N2" -o "${SUBDEVICE}" == "Odroid_C4" ]; then
+  if [ -f $SYSTEM_ROOT/usr/share/bootloader/hk-boot-logo-1080.bmp.gz ]; then
+    echo "Updating boot logos..."
+    cp -p $SYSTEM_ROOT/usr/share/bootloader/hk-boot-logo-1080.bmp.gz $BOOT_ROOT/boot-logo-1080.bmp.gz
+  fi
+fi
+
+if [ "${SUBDEVICE}" == "LePotato" -o "${SUBDEVICE}" == "LaFrite" ]; then
   if [ -f $SYSTEM_ROOT/usr/share/bootloader/boot-logo-1080.bmp.gz ]; then
     echo "Updating boot logos..."
-    cp -p $SYSTEM_ROOT/usr/share/bootloader/boot-logo-1080.bmp.gz $BOOT_ROOT
-  fi
-  if [ -f $SYSTEM_ROOT/usr/share/bootloader/timeout-logo-1080.bmp.gz ]; then
-    cp -p $SYSTEM_ROOT/usr/share/bootloader/timeout-logo-1080.bmp.gz $BOOT_ROOT
+    cp -p $SYSTEM_ROOT/usr/share/bootloader/boot-logo-1080.bmp.gz $BOOT_ROOT/boot-logo-1080.bmp.gz
   fi
 fi
 
@@ -136,6 +148,19 @@ if [ -f $SYSTEM_ROOT/usr/share/bootloader/${SUBDEVICE}_u-boot -a ! -e /dev/env ]
   echo "Updating u-boot on: $BOOT_DISK..."
   dd if=$SYSTEM_ROOT/usr/share/bootloader/${SUBDEVICE}_u-boot of=$BOOT_DISK conv=fsync bs=1 count=112 status=none
   dd if=$SYSTEM_ROOT/usr/share/bootloader/${SUBDEVICE}_u-boot of=$BOOT_DISK conv=fsync bs=512 skip=1 seek=1 status=none
+fi
+
+if [ -f $BOOT_ROOT/boot.scr ]; then
+  if [ -f $SYSTEM_ROOT/usr/share/bootloader/${SUBDEVICE}_chain_u-boot ]; then
+    echo "Updating chain loaded u-boot..."
+    cp -p $SYSTEM_ROOT/usr/share/bootloader/${SUBDEVICE}_chain_u-boot $BOOT_ROOT/u-boot.bin
+  fi
+  if [ "${SUBDEVICE}" == "LePotato"  -o "${SUBDEVICE}" == "LaFrite" ]; then
+    if [ -f $SYSTEM_ROOT/usr/share/bootloader/libretech_chain_boot ]; then
+      echo "Updating boot.scr..."
+      cp -p $SYSTEM_ROOT/usr/share/bootloader/libretech_chain_boot $BOOT_ROOT/boot.scr
+    fi
+  fi
 fi
 
 if [ -f $BOOT_ROOT/aml_autoscript ]; then
@@ -155,7 +180,7 @@ if [ -f $BOOT_ROOT/aml_autoscript ]; then
     echo "Updating cfgload..."
     cp -p $SYSTEM_ROOT/usr/share/bootloader/${SUBDEVICE}_cfgload $BOOT_ROOT/cfgload
   fi
-  $SYSTEM_ROOT/usr/sbin/checkbl301
+  $SYSTEM_ROOT/usr/lib/coreelec/check-bl301
   if [ ${?} = 1 ]; then
     echo "Found custom CoreELEC BL301, running inject_bl301 tool..."
     LD_LIBRARY_PATH=$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/sbin/inject_bl301 -s $SYSTEM_ROOT -Y &>/dev/null
@@ -163,11 +188,6 @@ if [ -f $BOOT_ROOT/aml_autoscript ]; then
 fi
 
 mount -o ro,remount $BOOT_ROOT
-
-if [ -e "/proc/device-tree/meson-remote/compatible" ]; then
-  echo "Executing remote-toggle..."
-  $SYSTEM_ROOT/usr/lib/coreelec/remote-toggle
-fi
 
 # Leave a hint that we just did an update
 echo "UPDATE" > /storage/.config/boot.hint
